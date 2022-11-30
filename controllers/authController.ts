@@ -45,6 +45,20 @@ class AuthController {
 
     res.status(200).send(currentUser);
   });
+
+  saveAddress = safe(async (req: Request, res: Response) => {
+    const { address: adrs } = req.body;
+
+    const { country, city, address } = adrs;
+
+    await UserModel.findOneAndUpdate(
+      //@ts-ignore
+      { email: req.user.email },
+      { address: `${country}, ${city}, ${address}` }
+    ).exec();
+
+    res.send({ ok: true });
+  });
 }
 
 export const authController = new AuthController();

@@ -16,5 +16,6 @@ authRouter.get(
   verifyAdmin,
   authController.getCurrentUser
 );
+authRouter.put('/save-address', verifyToken, authController.saveAddress)
 
 export default authRouter;

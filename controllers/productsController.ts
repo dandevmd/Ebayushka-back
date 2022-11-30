@@ -5,7 +5,12 @@ import { IProduct, ProductModel } from "../models/ProductModel";
 import { CategoryModel } from "../models/CategoryModel";
 import { SubCategoryModel } from "../models/SubCategoryModel";
 import mongoose from "mongoose";
-import { exec } from "child_process";
+
+interface IMatch {
+  _id: mongoose.Schema.Types.ObjectId;
+  document: IProduct;
+  floorAverage: number;
+}
 
 class ProductsController {
   list = safe(async (req: Request, res: Response) => {
@@ -202,7 +207,92 @@ class ProductsController {
     return related
       ? res.status(200).send(related)
       : res.status(200).send("No related products found");
+  });
+  byCategory = safe(async (req: Request, res: Response) => {
+    const { slug } = req.params;
+    const category = await CategoryModel.findOne({ slug }).exec();
+    const productByCategory =
+      category &&
+      (await ProductModel.find({
+        category: category?._id as mongoose.Types.ObjectId,
+      }));
 
+    return productByCategory
+      ? res.status(200).send(productByCategory)
+      : res.status(200).send("By this category no products was found");
+  });
+  bySub = safe(async (req: Request, res: Response) => {
+    const { slug } = req.params;
+    const sub = await SubCategoryModel.findOne({ slug }).exec();
+    const productsBySub =
+      sub &&
+      (await ProductModel.find({
+        subs: sub?._id as mongoose.Types.ObjectId,
+      }));
+
+    return productsBySub
+      ? res.status(200).send(productsBySub)
+      : res.status(200).send("By this category no products was found");
+  });
+
+  bySearchFilters = safe(async (req: Request, res: Response) => {
+    const { query, category, rating, price, color } = req.body;
+    const queryFilter =
+      query && query !== ""
+        ? {
+            title: {
+              $regex: query,
+              $options: "i",
+            },
+          }
+        : {};
+    const categoryFilter = category ? { category } : {};
+
+    const priceFilter = price
+      ? {
+          price: {
+            $gte: Number(price[0]),
+            $lte: Number(price[1]),
+          },
+        }
+      : {};
+
+    const colorFilter = color && color !== 'Select color...' ? {color} : {}
+
+    const match:IMatch[] = await ProductModel.aggregate([
+      {
+        $project: {
+          document: "$$ROOT",
+          floorAverage: {
+            $floor: { $avg: "$ratings.rating" },
+          },
+        },
+      },
+      { $match: { floorAverage: rating } },
+    ]);
+
+    const product: IProduct[] = await ProductModel.find({
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...colorFilter
+      // ...ratingFilter,
+    });
+
+    const matchID = match.map((m) => m._id.toString());
+    const filterResult = product.filter((el) =>
+      matchID.includes(el._id.toString())
+    );
+
+    if (rating) {
+      return res.send(filterResult);
+    }
+    return res.send(product);
+
+    // if (rating) {
+    //   const p = await handleRating(req, res, rating);
+    //   return res.send(p);
+    // }
   });
 }
 
