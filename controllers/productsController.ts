@@ -276,7 +276,6 @@ class ProductsController {
       ...categoryFilter,
       ...priceFilter,
       ...colorFilter
-      // ...ratingFilter,
     });
 
     const matchID = match.map((m) => m._id.toString());
@@ -289,10 +288,7 @@ class ProductsController {
     }
     return res.send(product);
 
-    // if (rating) {
-    //   const p = await handleRating(req, res, rating);
-    //   return res.send(p);
-    // }
+  
   });
 }
 
