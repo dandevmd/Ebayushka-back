@@ -21,9 +21,11 @@ class CartController {
       console.log("cart removed");
     }
 
+
     const products = cart.map((element: any) => {
       const obj = {
         product: element._id,
+        title:element.title,
         price: element.price,
         count: element.count,
         color: element.color,
@@ -35,13 +37,14 @@ class CartController {
       return a + i.count * i.price;
     }, 0);
 
-    const newCart = await CartModel.create({
+    const newCart = await new CartModel({
       //i dont know why but it saves in arrray only the id field
       products: products,
       cartTotal: totalPrice,
       orderBy: user?._id,
-    });
-    console.log(newCart, "?????????????????????????");
+    }).save();
+
+
     res.status(201).send({ ok: true });
   });
 

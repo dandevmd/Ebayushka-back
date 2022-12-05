@@ -5,9 +5,10 @@ const cartSchema = new mongoose.Schema(
     products: [
       {
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        title:String,
+        price: Number,
         count: Number,
         color: String,
-        price: Number,
       },
     ],
     cartTotal: Number,
@@ -15,6 +16,7 @@ const cartSchema = new mongoose.Schema(
     orderBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      require: true,
     },
   },
   { timestamps: true }

@@ -44,19 +44,42 @@ class CouponController {
     //@ts-ignore
     const user = await UserModel.findOne({ email: req.user.email }).exec();
     const coupon = await CouponModel.findOne({ name }).exec();
-    const expire = coupon?.expire;
-    const isExpired = isInThePast(expire!);
-    const cart = await CartModel.findOne({
-      orderBy: user?._id as mongoose.Types.ObjectId,
-    }).exec();
-    const totalAfterDiscount =
-      cart?.cartTotal &&
-      coupon?.discount &&
-      (cart?.cartTotal * coupon?.discount) / 100;
+    const usersAppliedCoupons =  user?.couponsApplied?.filter(
+      (c: string) => c === name
+    );
+    if (usersAppliedCoupons && usersAppliedCoupons?.length > 0) {
+      return res.send("This coupon was already applied");
+    }
 
-    totalAfterDiscount
-      ? res.send({ totalAfterDiscount })
-      : res.status(400).send("Your coupon is not valid");
+
+    const expire = coupon && coupon?.expire;
+    const isExpired = isInThePast(expire!);
+    if (isExpired) {
+      return res.send("This coupon is expired");
+    }
+
+    if (!isExpired) {
+      const cart = await CartModel.findOne({
+        orderBy: user?._id as mongoose.Types.ObjectId,
+      }).exec();
+      const totalAfterDiscount =
+        cart?.cartTotal &&
+        coupon?.discount &&
+        (cart?.cartTotal * coupon?.discount) / 100;
+
+      const cartUpdate = await CartModel.findOneAndUpdate(
+        { email: user?.email },
+        { cartTotal: totalAfterDiscount }
+      ).exec();
+
+      const pushCoupon = await UserModel.findOneAndUpdate(
+        //@ts-ignore
+        { email: req.user.email },
+        { $push: { couponsApplied: name } }
+      ).exec();
+      totalAfterDiscount && res.send({ totalAfterDiscount });
+      return;
+    }
   });
 }
 

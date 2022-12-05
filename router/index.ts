@@ -6,6 +6,9 @@ import productsRouter from "./productsRouter";
 import uploadRouter from "./uploadRouter";
 import cartRouter from "./cartRouter";
 import couponRouter from "./couponRouter";
+import stripeRouter from "./stripeRouter";
+import orderRouter from "./orderRouter";
+import wishlistRouter from  './wishlistRouter'
 
 const router = Router();
 
@@ -16,5 +19,8 @@ router.use("/products", productsRouter);
 router.use("/upload", uploadRouter);
 router.use('/cart', cartRouter)
 router.use('/coupon', couponRouter)
+router.use('/stripe', stripeRouter)
+router.use('/order', orderRouter)
+router.use('/wishlist', wishlistRouter)
 
 export default router;

@@ -54,7 +54,7 @@ class AuthController {
     await UserModel.findOneAndUpdate(
       //@ts-ignore
       { email: req.user.email },
-      { address: `${country}, ${city}, ${address}` }
+      { address: `Country: ${country}, City: ${city}, Address: ${address}` }
     ).exec();
 
     res.send({ ok: true });
