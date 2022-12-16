@@ -1,12 +1,15 @@
-import admin from "firebase-admin"
-import serviceAccount from './fbServiceAccountKey.json'
+import admin from "firebase-admin";
+import path from "path";
 
-// var serviceAccount = require("./fbServiceAccountKey.json");
+var serviceAccount = require(path.join(
+  __dirname,
+  "./firebaseConfig/fbServiceAccountKey.json"
+));
 
 export const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as any),
-
-  
+  credential: admin.credential.cert(serviceAccount),
 });
 
-if(!app){console.log('connection with firebase admin gone wrong')}
+if (!app) {
+  console.log("connection with firebase admin gone wrong");
+}
