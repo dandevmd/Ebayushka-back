@@ -3,7 +3,7 @@ import path from "path";
 
 var serviceAccount = require(path.join(
   __dirname,
-  "./firebaseConfig/fbServiceAccountKey.json"
+  "fbServiceAccountKey.json"
 ));
 
 export const app = admin.initializeApp({
